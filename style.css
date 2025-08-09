@@ -1,0 +1,302 @@
+/* ─────────────────── GLOBAL STYLES & VARIABLES ─────────────────── */
+:root {
+    --primary-color: #2563EB;
+    --secondary-accent: #FBBF24;
+    --background-color: #F3F4F6;
+    --heading-color: #1F2937;
+    --body-text-color: #4B5563;
+    --cta-color: #10B981;
+    --white-color: #FFFFFF;
+    --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--background-color);
+    color: var(--body-text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+h1, h2, h3 {
+    color: var(--heading-color);
+    font-weight: 600;
+}
+
+h1 { font-size: 2.8rem; }
+h2 { font-size: 2rem; margin-bottom: 1rem; }
+h3 { font-size: 1.25rem; }
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* ────────────────────────── HEADER ────────────────────────── */
+.site-header {
+    background-color: var(--white-color);
+    padding: 1rem 0;
+    box-shadow: var(--soft-shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.main-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.main-nav a {
+    color: var(--body-text-color);
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.main-nav a:hover {
+    color: var(--primary-color);
+}
+
+/* ────────────────────────── HERO SECTION ────────────────────────── */
+.hero-section {
+    padding: 6rem 0;
+    background-color: var(--white-color);
+}
+
+.hero-icons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.icon-accent {
+    font-size: 1.5rem;
+    display: inline-block;
+    padding: 0.75rem;
+    border-radius: 50%;
+    line-height: 1;
+}
+
+.subheadline {
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 1rem auto 2rem;
+}
+
+.cta-button {
+    background-color: var(--cta-color);
+    color: var(--white-color);
+    padding: 0.9rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: inline-block;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: #059669; /* Darker green */
+    transform: translateY(-3px);
+}
+
+/* ────────────────────────── SEARCH BAR ────────────────────────── */
+.search-section {
+    padding: 2rem 0;
+    margin-top: -1px; /* Overlap with hero for seamless look */
+    background-color: var(--background-color);
+}
+
+#tool-search {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    border: 2px solid #E5E7EB;
+    box-shadow: var(--soft-shadow);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#tool-search:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+}
+
+/* ────────────────────────── TOOL SECTIONS ────────────────────────── */
+.tools-container {
+    padding-top: 2rem;
+}
+
+.tool-category {
+    margin-bottom: 4rem;
+}
+
+.category-description {
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    color: var(--body-text-color);
+}
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.tool-card {
+    background-color: var(--white-color);
+    padding: 1.75rem;
+    border-radius: 12px;
+    box-shadow: var(--soft-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.tool-card h3 {
+    margin-bottom: 0.5rem;
+}
+
+.tool-card p {
+    flex-grow: 1; /* Pushes button to the bottom */
+    margin-bottom: 1.5rem;
+}
+
+.tool-button {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tool-button:hover {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+}
+
+
+/* ────────────────────────── FOOTER ────────────────────────── */
+.site-footer {
+    background-color: var(--white-color);
+    color: var(--body-text-color);
+    padding: 3rem 0;
+    margin-top: 4rem;
+    border-top: 1px solid #E5E7EB;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.footer-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--heading-color);
+}
+
+.footer-logo span {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--body-text-color);
+    margin-top: 0.25rem;
+}
+
+.footer-links {
+    text-align: right;
+}
+
+.footer-links a {
+    color: var(--body-text-color);
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--primary-color);
+}
+
+.quick-links {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* ────────────────────────── MOBILE RESPONSIVENESS ────────────────────────── */
+@media (max-width: 768px) {
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 1.7rem; }
+
+    .header-content {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .hero-section {
+        padding: 4rem 0;
+    }
+
+    .tool-grid {
+        grid-template-columns: 1fr; /* Stack cards on mobile */
+    }
+
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-links {
+        text-align: center;
+    }
+
+    .quick-links {
+        justify-content: center;
+    }
+}
