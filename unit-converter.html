@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Converter - ToolHive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ─────────────────── GLOBAL STYLES & VARIABLES (from main site) ─────────────────── */
+        :root {
+            --primary-color: #2563EB;
+            --secondary-accent: #FBBF24;
+            --background-color: #F3F4F6;
+            --heading-color: #1F2937;
+            --body-text-color: #4B5563;
+            --cta-color: #10B981;
+            --white-color: #FFFFFF;
+            --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--body-text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        h1, h2 {
+            color: var(--heading-color);
+            font-weight: 600;
+        }
+
+        /* ────────────────────────── HEADER ────────────────────────── */
+        .site-header {
+            background-color: var(--white-color);
+            padding: 1rem 0;
+            box-shadow: var(--soft-shadow);
+            width: 100%;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .main-nav a {
+            color: var(--body-text-color);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .main-nav a:hover {
+            color: var(--primary-color);
+        }
+
+        /* ─────────────────── UNIT CONVERTER STYLES ─────────────────── */
+        main {
+            flex-grow: 1;
+            padding: 3rem 0;
+        }
+
+        .converter-wrapper {
+            background-color: var(--white-color);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--soft-shadow);
+        }
+
+        .tool-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .tool-title h1 {
+            font-size: 2.2rem;
+        }
+        
+        .tool-title p {
+            font-size: 1.1rem;
+            color: var(--body-text-color);
+            margin-top: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--heading-color);
+        }
+
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            border-radius: 8px;
+            border: 2px solid #E5E7EB;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group select:focus, .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+        }
+
+        .conversion-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .conversion-row .form-group {
+            flex: 1;
+        }
+        
+        .swap-button {
+            margin-top: 1.25rem; /* Aligns with the label offset */
+            background: none;
+            border: 2px solid #D1D5DB;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--body-text-color);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .swap-button:hover {
+            transform: rotate(180deg);
+            background-color: #E5E7EB;
+            border-color: var(--primary-color);
+        }
+
+        .result-box {
+            margin-top: 2rem;
+            background-color: var(--background-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-box h2 {
+            font-size: 1.2rem;
+            color: var(--body-text-color);
+            font-weight: 400;
+        }
+        
+        #result-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 0.5rem;
+            word-break: break-all;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .conversion-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .swap-button {
+                transform: rotate(90deg);
+                margin: 0.5rem 0;
+            }
+            .swap-button:hover {
+                transform: rotate(270deg);
+            }
+            .converter-wrapper {
+                padding: 1.5rem;
+            }
+            .tool-title h1 {
+                font-size: 1.8rem;
+            }
+            #result-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">ToolHive</a>
+            <nav class="main-nav">
+                <a href="index.html#tools">← Back to All Tools</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="converter-wrapper">
+                <div class="tool-title">
+                    <h1>🎓 Unit Converter</h1>
+                    <p>Quickly and accurately convert between common units.</p>
+                </div>
+
+                <!-- Category Selector -->
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option value="length">Length</option>
+                        <option value="mass">Mass</option>
+                        <option value="temperature">Temperature</option>
+                        <option value="volume">Volume</option>
+                        <option value="area">Area</option>
+                    </select>
+                </div>
+
+                <!-- Conversion Inputs -->
+                <div class="conversion-row">
+                    <div class="form-group">
+                        <label for="from-unit">From</label>
+                        <input type="number" id="input-value" value="1">
+                        <select id="from-unit"></select>
+                    </div>
+                    
+                    <button id="swap-button" title="Swap Units">⇄</button>
+                    
+                    <div class="form-group">
+                        <label for="to-unit">To</label>
+                        <div id="result-box" class="result-box">
+                             <h2>Result</h2>
+                             <p id="result-value">-</p>
+                        </div>
+                        <select id="to-unit"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const categorySelect = document.getElementById('category');
+            const fromUnitSelect = document.getElementById('from-unit');
+            const toUnitSelect = document.getElementById('to-unit');
+            const inputValue = document.getElementById('input-value');
+            const resultValue = document.getElementById('result-value');
+            const swapButton = document.getElementById('swap-button');
+
+            // Conversion data
+            const units = {
+                length: {
+                    base: 'meter',
+                    data: {
+                        meter: { name: 'Meter', to_base: 1 },
+                        kilometer: { name: 'Kilometer', to_base: 1000 },
+                        centimeter: { name: 'Centimeter', to_base: 0.01 },
+                        millimeter: { name: 'Millimeter', to_base: 0.001 },
+                        mile: { name: 'Mile', to_base: 1609.34 },
+                        yard: { name: 'Yard', to_base: 0.9144 },
+                        foot: { name: 'Foot', to_base: 0.3048 },
+                        inch: { name: 'Inch', to_base: 0.0254 },
+                    }
+                },
+                mass: {
+                    base: 'gram',
+                    data: {
+                        gram: { name: 'Gram', to_base: 1 },
+                        kilogram: { name: 'Kilogram', to_base: 1000 },
+                        milligram: { name: 'Milligram', to_base: 0.001 },
+                        pound: { name: 'Pound', to_base: 453.592 },
+                        ounce: { name: 'Ounce', to_base: 28.3495 },
+                    }
+                },
+                temperature: {
+                    base: 'celsius', // Base for logic, not direct conversion
+                    data: {
+                        celsius: { name: 'Celsius (°C)'},
+                        fahrenheit: { name: 'Fahrenheit (°F)'},
+                        kelvin: { name: 'Kelvin (K)'}
+                    }
+                },
+                volume: {
+                    base: 'liter',
+                    data: {
+                        liter: { name: 'Liter', to_base: 1 },
+                        milliliter: { name: 'Milliliter', to_base: 0.001 },
+                        gallon: { name: 'Gallon (US)', to_base: 3.78541 },
+                        quart: { name: 'Quart (US)', to_base: 0.946353 },
+                        pint: { name: 'Pint (US)', to_base: 0.473176 },
+                        cup: { name: 'Cup (US)', to_base: 0.24 },
+                    }
+                },
+                area: {
+                    base: 'square_meter',
+                    data: {
+                        square_meter: { name: 'Square Meter', to_base: 1 },
+                        square_kilometer: { name: 'Square Kilometer', to_base: 1000000 },
+                        square_mile: { name: 'Square Mile', to_base: 2590000 },
+                        hectare: { name: 'Hectare', to_base: 10000 },
+                        acre: { name: 'Acre', to_base: 4046.86 },
+                    }
+                }
+            };
+
+            // --- FUNCTIONS ---
+
+            // Populates the 'from' and 'to' dropdowns based on selected category
+            function populateUnits() {
+                const category = categorySelect.value;
+                const unitData = units[category].data;
+
+                fromUnitSelect.innerHTML = '';
+                toUnitSelect.innerHTML = '';
+
+                for (const key in unitData) {
+                    const optionFrom = document.createElement('option');
+                    optionFrom.value = key;
+                    optionFrom.textContent = unitData[key].name;
+                    fromUnitSelect.appendChild(optionFrom);
+
+                    const optionTo = document.createElement('option');
+                    optionTo.value = key;
+                    optionTo.textContent = unitData[key].name;
+                    toUnitSelect.appendChild(optionTo);
+                }
+                
+                // Set default different units
+                fromUnitSelect.selectedIndex = 0;
+                toUnitSelect.selectedIndex = 1;
+
+                convert();
+            }
+
+            // Performs the unit conversion
+            function convert() {
+                const value = parseFloat(inputValue.value);
+                if (isNaN(value)) {
+                    resultValue.textContent = '-';
+                    return;
+                }
+
+                const category = categorySelect.value;
+                const fromUnit = fromUnitSelect.value;
+                const toUnit = toUnitSelect.value;
+
+                let result;
+
+                // Special handling for temperature
+                if (category === 'temperature') {
+                    result = convertTemperature(value, fromUnit, toUnit);
+                } else {
+                    // Standard conversion for other categories
+                    const baseUnit = units[category].base;
+                    const valueInBase = value * units[category].data[fromUnit].to_base;
+                    result = valueInBase / units[category].data[toUnit].to_base;
+                }
+                
+                // Format the result to a reasonable number of decimal places
+                if (Math.abs(result) < 0.0001 && result !== 0) {
+                     resultValue.textContent = result.toExponential(4);
+                } else {
+                     resultValue.textContent = parseFloat(result.toFixed(4)).toLocaleString();
+                }
+            }
+            
+            // Handles temperature conversions which have different formulas
+            function convertTemperature(value, from, to) {
+                if (from === to) return value;
+
+                let celsius;
+                // First, convert input to Celsius
+                switch (from) {
+                    case 'celsius':
+                        celsius = value;
+                        break;
+                    case 'fahrenheit':
+                        celsius = (value - 32) * 5 / 9;
+                        break;
+                    case 'kelvin':
+                        celsius = value - 273.15;
+                        break;
+                }
+
+                // Then, convert from Celsius to the target unit
+                switch (to) {
+                    case 'celsius':
+                        return celsius;
+                    case 'fahrenheit':
+                        return (celsius * 9 / 5) + 32;
+                    case 'kelvin':
+                        return celsius + 273.15;
+                }
+            }
+            
+            // Swaps the 'from' and 'to' units
+            function swapUnits() {
+                const fromIndex = fromUnitSelect.selectedIndex;
+                fromUnitSelect.selectedIndex = toUnitSelect.selectedIndex;
+                toUnitSelect.selectedIndex = fromIndex;
+                convert();
+            }
+
+            // --- EVENT LISTENERS ---
+            categorySelect.addEventListener('change', populateUnits);
+            fromUnitSelect.addEventListener('change', convert);
+            toUnitSelect.addEventListener('change', convert);
+            inputValue.addEventListener('input', convert);
+            swapButton.addEventListener('click', swapUnits);
+            
+            // --- INITIALIZATION ---
+            populateUnits();
+        });
+    </script>
+</body>
+</html>
