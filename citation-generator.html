@@ -1,0 +1,134 @@
+<!-- Citation Generator (Vanilla JS + Tailwind CDN) -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<div class="min-h-screen bg-gray-50 p-6 flex items-start justify-center">
+  <div class="max-w-4xl w-full bg-white rounded-2xl shadow-lg p-6">
+    <header class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold">Citation Generator</h1>
+        <p class="text-sm text-gray-600">Generate APA, MLA, and Chicago citations for books, journals, and websites.</p>
+      </div>
+      <div class="flex gap-2 items-center">
+        <select id="style" class="border px-3 py-2 rounded">
+          <option>APA</option>
+          <option>MLA</option>
+          <option>Chicago</option>
+        </select>
+        <select id="type" class="border px-3 py-2 rounded">
+          <option value="book">Book</option>
+          <option value="journal">Journal Article</option>
+          <option value="website">Website</option>
+        </select>
+      </div>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Left side -->
+      <section class="p-4 border rounded">
+        <h2 class="font-semibold mb-3">Source details</h2>
+        <div id="inputs"></div>
+
+        <div class="flex gap-2 mt-2">
+          <button onclick="generateCitation()" class="px-4 py-2 bg-blue-600 text-white rounded">Generate</button>
+          <button onclick="copyCitation()" class="px-4 py-2 border rounded">Copy</button>
+          <button onclick="resetForm()" class="px-4 py-2 border rounded">Reset</button>
+        </div>
+
+        <p id="error" class="text-red-500 mt-2"></p>
+      </section>
+
+      <!-- Right side -->
+      <section class="p-4 border rounded bg-gray-50">
+        <h2 class="font-semibold mb-3">Generated citation</h2>
+        <div class="min-h-[150px] p-3 rounded bg-white border">
+          <p id="citation" class="whitespace-pre-wrap text-sm text-gray-800">
+            Your generated citation will appear here after you click 'Generate'.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+let fields = {
+  authors: "Authors (Last, First; Last, First)",
+  year: "Year",
+  title: "Title",
+  edition: "Edition",
+  publisher: "Publisher / Site name",
+  city: "City",
+  journal: "Journal Title",
+  volume: "Volume",
+  issue: "Issue",
+  pages: "Pages",
+  doi: "DOI",
+  url: "URL",
+  accessDate: "Access Date"
+};
+
+function renderFields() {
+  let type = document.getElementById("type").value;
+  let html = "";
+  for (let key in fields) {
+    if (
+      (type === "book" && ["authors","year","title","edition","publisher","city"].includes(key)) ||
+      (type === "journal" && ["authors","year","title","journal","volume","issue","pages","doi"].includes(key)) ||
+      (type === "website" && ["authors","year","title","publisher","url","accessDate"].includes(key))
+    ) {
+      html += `<label class="text-sm">${fields[key]}</label>
+               <input id="${key}" class="w-full border p-2 rounded mb-2" placeholder="${fields[key]}">`;
+    }
+  }
+  document.getElementById("inputs").innerHTML = html;
+}
+
+function parseAuthors(raw) {
+  if (!raw) return [];
+  return raw.split(";").map(a => {
+    let parts = a.split(",").map(p => p.trim());
+    return { last: parts[0] || "", first: parts[1] || "" };
+  });
+}
+
+function formatAuthorsAPA(authors) {
+  if (!authors.length) return "";
+  if (authors.length === 1) return `${authors[0].last}, ${authors[0].first.charAt(0)}.`;
+  if (authors.length === 2) return `${authors[0].last}, ${authors[0].first.charAt(0)}., & ${authors[1].last}, ${authors[1].first.charAt(0)}.`;
+  return `${authors[0].last}, ${authors[0].first.charAt(0)}., ${authors[1].last}, ${authors[1].first.charAt(0)}., & ${authors[2].last}, ${authors[2].first.charAt(0)}.`;
+}
+
+function generateCitation() {
+  let style = document.getElementById("style").value;
+  let type = document.getElementById("type").value;
+  let authors = parseAuthors(document.getElementById("authors").value || "");
+  let year = document.getElementById("year")?.value || "n.d.";
+  let title = document.getElementById("title")?.value || "(No title)";
+  let citation = "";
+
+  if (style === "APA" && type === "book") {
+    citation = `${formatAuthorsAPA(authors)} (${year}). ${title}. ${document.getElementById("publisher")?.value || "(No publisher)"}.`;
+  } 
+  else if (style === "APA" && type === "journal") {
+    citation = `${formatAuthorsAPA(authors)} (${year}). ${title}. ${document.getElementById("journal")?.value || "(No journal)"}.`;
+  }
+  else if (style === "APA" && type === "website") {
+    citation = `${formatAuthorsAPA(authors)} (${year}). ${title}. ${document.getElementById("url")?.value || "(No URL)"}`;
+  }
+
+  document.getElementById("citation").innerText = citation;
+}
+
+function copyCitation() {
+  let citation = document.getElementById("citation").innerText;
+  navigator.clipboard.writeText(citation).then(() => alert("Copied!"));
+}
+
+function resetForm() {
+  renderFields();
+  document.getElementById("citation").innerText = "Your generated citation will appear here after you click 'Generate'.";
+}
+
+document.getElementById("type").addEventListener("change", renderFields);
+renderFields();
+</script>
