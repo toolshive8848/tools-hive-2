@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word to PDF Converter - ToolHive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- External Libraries for Conversion -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* ─────────────────── GLOBAL STYLES & VARIABLES ─────────────────── */
+        :root {
+            --primary-color: #2563EB;
+            --secondary-accent: #FBBF24;
+            --background-color: #F3F4F6;
+            --heading-color: #1F2937;
+            --body-text-color: #4B5563;
+            --cta-color: #10B981;
+            --white-color: #FFFFFF;
+            --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--body-text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        /* ────────────────────────── HEADER ────────────────────────── */
+        .site-header {
+            background-color: var(--white-color);
+            padding: 1rem 0;
+            box-shadow: var(--soft-shadow);
+            width: 100%;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .main-nav a {
+            color: var(--body-text-color);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .main-nav a:hover {
+            color: var(--primary-color);
+        }
+
+        /* ─────────────────── CONVERTER STYLES ─────────────────── */
+        main {
+            flex-grow: 1;
+            padding: 3rem 0;
+        }
+
+        .converter-wrapper {
+            background-color: var(--white-color);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--soft-shadow);
+            text-align: center;
+        }
+
+        .tool-title h1 {
+            font-size: 2.2rem;
+            color: var(--heading-color);
+        }
+        
+        .tool-title p {
+            font-size: 1.1rem;
+            color: var(--body-text-color);
+            margin-top: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            border: 3px dashed #D1D5DB;
+            border-radius: 12px;
+            padding: 3rem 1rem;
+            cursor: pointer;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: #EBF2FF;
+        }
+
+        .upload-area-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+        }
+
+        .upload-area p {
+            margin: 0.5rem 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+        
+        .upload-area span {
+            color: var(--body-text-color);
+            font-size: 0.9rem;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        #status-area {
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .status-message {
+            color: var(--body-text-color);
+        }
+        
+        .status-message.processing {
+            color: var(--secondary-accent);
+        }
+        
+        .status-message.success {
+            color: var(--cta-color);
+        }
+        
+        .status-message.error {
+            color: #EF4444;
+        }
+
+        .convert-button {
+            display: none; /* Hidden by default */
+            width: 100%;
+            max-width: 300px;
+            margin: 1rem auto 0;
+            padding: 0.9rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .convert-button:disabled {
+            background-color: #9CA3AF;
+            cursor: not-allowed;
+        }
+
+        .convert-button:hover:not(:disabled) {
+            background-color: #1D4ED8;
+        }
+        
+        /* Hidden container for rendering DOCX content */
+        #docx-container {
+            position: absolute;
+            left: -9999px; /* Move it off-screen */
+            top: -9999px;
+            background: white;
+            padding: 1in; /* Standard page margin */
+            width: 8.5in; /* Standard letter width */
+            min-height: 11in;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">ToolHive</a>
+            <nav class="main-nav">
+                <a href="index.html#tools">← Back to All Tools</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="converter-wrapper">
+                <div class="tool-title">
+                    <h1>📄 Word to PDF Converter</h1>
+                    <p>Convert .docx files to PDF securely in your browser. No uploads required.</p>
+                </div>
+
+                <div id="upload-area" class="upload-area">
+                    <div class="upload-area-icon">📤</div>
+                    <p>Drag & Drop a .docx file here</p>
+                    <span>or click to select a file</span>
+                </div>
+                <input type="file" id="file-input" accept=".docx,.doc">
+
+                <div id="status-area">
+                    <p id="status-message" class="status-message">Select a file to begin.</p>
+                </div>
+                
+                <button id="convert-button" class="convert-button" disabled>Convert to PDF</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- This hidden div is where the docx content will be rendered before PDF conversion -->
+    <div id="docx-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            const statusMessage = document.getElementById('status-message');
+            const convertButton = document.getElementById('convert-button');
+            const docxContainer = document.getElementById('docx-container');
+            let selectedFile = null;
+
+            // --- EVENT LISTENERS ---
+
+            // Handle click to upload
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            // Handle file selection
+            fileInput.addEventListener('change', (event) => {
+                handleFile(event.target.files[0]);
+            });
+
+            // Handle drag and drop
+            uploadArea.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (event) => {
+                event.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFile(event.dataTransfer.files[0]);
+            });
+
+            // Handle conversion button click
+            convertButton.addEventListener('click', convertToPdf);
+
+            // --- FUNCTIONS ---
+
+            function handleFile(file) {
+                if (!file) {
+                    selectedFile = null;
+                    updateStatus('Select a file to begin.', 'default');
+                    convertButton.style.display = 'none';
+                    return;
+                }
+                
+                if (!file.name.endsWith('.docx') && !file.name.endsWith('.doc')) {
+                    updateStatus('Error: Please select a .docx or .doc file.', 'error');
+                    selectedFile = null;
+                    convertButton.style.display = 'none';
+                    return;
+                }
+
+                selectedFile = file;
+                updateStatus(`File selected: ${file.name}`, 'success');
+                convertButton.style.display = 'block';
+                convertButton.disabled = false;
+            }
+
+            function updateStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = `status-message ${type}`;
+            }
+
+            async function convertToPdf() {
+                if (!selectedFile) {
+                    updateStatus('No file selected.', 'error');
+                    return;
+                }
+
+                updateStatus('Processing... Reading Word file.', 'processing');
+                convertButton.disabled = true;
+
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    const arrayBuffer = event.target.result;
+
+                    try {
+                        // 1. Use mammoth.js to convert DOCX to HTML
+                        const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+                        docxContainer.innerHTML = result.value;
+                        
+                        updateStatus('Processing... Generating PDF.', 'processing');
+
+                        // 2. Use html2canvas and jsPDF to create the PDF
+                        const { jsPDF } = window.jspdf;
+                        const canvas = await html2canvas(docxContainer, {
+                            scale: 2, // Higher scale for better quality
+                            useCORS: true,
+                            logging: false
+                        });
+
+                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new jsPDF({
+                            orientation: 'portrait',
+                            unit: 'pt', // points
+                            format: 'a4'
+                        });
+
+                        const pdfWidth = pdf.internal.pageSize.getWidth();
+                        const pdfHeight = pdf.internal.pageSize.getHeight();
+                        const canvasWidth = canvas.width;
+                        const canvasHeight = canvas.height;
+                        const ratio = canvasHeight / canvasWidth;
+                        const height = pdfWidth * ratio;
+
+                        // Check if content fits on one page, otherwise split
+                        let position = 0;
+                        let pageHeight = pdf.internal.pageSize.height;
+                        let heightLeft = canvasHeight;
+
+                        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, height);
+                        heightLeft -= pageHeight;
+                        
+                        while (heightLeft > 0) {
+                            position = heightLeft - canvasHeight;
+                            pdf.addPage();
+                            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, height);
+                            heightLeft -= pageHeight;
+                        }
+
+                        // 3. Trigger download
+                        const originalFileName = selectedFile.name.substring(0, selectedFile.name.lastIndexOf('.'));
+                        pdf.save(`${originalFileName}.pdf`);
+
+                        updateStatus('Success! Your PDF has been downloaded.', 'success');
+
+                    } catch (error) {
+                        console.error('Conversion Error:', error);
+                        updateStatus('Error: Could not convert the file. It may be corrupted or in an unsupported format.', 'error');
+                    } finally {
+                        convertButton.disabled = false;
+                        docxContainer.innerHTML = ''; // Clean up
+                    }
+                };
+                
+                reader.onerror = () => {
+                     updateStatus('Error: Failed to read the file.', 'error');
+                     convertButton.disabled = false;
+                };
+
+                reader.readAsArrayBuffer(selectedFile);
+            }
+        });
+    </script>
+</body>
+</html>
