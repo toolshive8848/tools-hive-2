@@ -1,134 +1,477 @@
-<!-- Citation Generator (Vanilla JS + Tailwind CDN) -->
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citation Generator - ToolHive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ─────────────────── GLOBAL STYLES & VARIABLES ─────────────────── */
+        :root {
+            --primary-color: #2563EB;
+            --secondary-accent: #FBBF24;
+            --background-color: #F3F4F6;
+            --heading-color: #1F2937;
+            --body-text-color: #4B5563;
+            --cta-color: #10B981;
+            --white-color: #FFFFFF;
+            --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
 
-<div class="min-h-screen bg-gray-50 p-6 flex items-start justify-center">
-  <div class="max-w-4xl w-full bg-white rounded-2xl shadow-lg p-6">
-    <header class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-2xl font-bold">Citation Generator</h1>
-        <p class="text-sm text-gray-600">Generate APA, MLA, and Chicago citations for books, journals, and websites.</p>
-      </div>
-      <div class="flex gap-2 items-center">
-        <select id="style" class="border px-3 py-2 rounded">
-          <option>APA</option>
-          <option>MLA</option>
-          <option>Chicago</option>
-        </select>
-        <select id="type" class="border px-3 py-2 rounded">
-          <option value="book">Book</option>
-          <option value="journal">Journal Article</option>
-          <option value="website">Website</option>
-        </select>
-      </div>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--body-text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+            width: 100%;
+        }
+
+        /* ────────────────────────── HEADER ────────────────────────── */
+        .site-header {
+            background-color: var(--white-color);
+            padding: 1rem 0;
+            box-shadow: var(--soft-shadow);
+            width: 100%;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .main-nav a {
+            color: var(--body-text-color);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .main-nav a:hover {
+            color: var(--primary-color);
+        }
+
+        /* ─────────────────── CITATION GENERATOR STYLES ─────────────────── */
+        main {
+            flex-grow: 1;
+            padding: 3rem 0;
+        }
+
+        .generator-wrapper {
+            background-color: var(--white-color);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--soft-shadow);
+        }
+
+        .tool-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .tool-title h1 {
+            font-size: 2.2rem;
+        }
+        
+        .tool-title p {
+            font-size: 1.1rem;
+            color: var(--body-text-color);
+            margin-top: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--heading-color);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            border-radius: 8px;
+            border: 2px solid #E5E7EB;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .generate-button {
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .generate-button:hover {
+            background-color: #1D4ED8;
+        }
+        
+        #results-container {
+            margin-top: 2.5rem;
+            display: none; /* Hidden by default */
+        }
+        
+        .citation-box {
+            background-color: var(--background-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .citation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .citation-header h3 {
+            color: var(--heading-color);
+        }
+        
+        .copy-button {
+            background-color: var(--cta-color);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .copy-button:hover {
+            background-color: #059669;
+        }
+        
+        .citation-text {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .generator-wrapper {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="site-header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">ToolHive</a>
+            <nav class="main-nav">
+                <a href="index.html#tools">← Back to All Tools</a>
+            </nav>
+        </div>
     </header>
 
-    <main class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- Left side -->
-      <section class="p-4 border rounded">
-        <h2 class="font-semibold mb-3">Source details</h2>
-        <div id="inputs"></div>
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="generator-wrapper">
+                <div class="tool-title">
+                    <h1>🎓 Citation Generator</h1>
+                    <p>Create citations in APA, MLA, and Chicago formats.</p>
+                </div>
 
-        <div class="flex gap-2 mt-2">
-          <button onclick="generateCitation()" class="px-4 py-2 bg-blue-600 text-white rounded">Generate</button>
-          <button onclick="copyCitation()" class="px-4 py-2 border rounded">Copy</button>
-          <button onclick="resetForm()" class="px-4 py-2 border rounded">Reset</button>
+                <form id="citation-form">
+                    <!-- Source Type -->
+                    <div class="form-group">
+                        <label for="source-type">Source Type</label>
+                        <select id="source-type">
+                            <option value="website">Website</option>
+                            <option value="book">Book</option>
+                            <option value="journal">Journal Article</option>
+                        </select>
+                    </div>
+
+                    <!-- Input Fields -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="author-first">Author's First Name</label>
+                            <input type="text" id="author-first" placeholder="e.g., John">
+                        </div>
+                        <div class="form-group">
+                            <label for="author-last">Author's Last Name</label>
+                            <input type="text" id="author-last" placeholder="e.g., Doe" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="title">Title of Work</label>
+                        <input type="text" id="title" placeholder="e.g., The Principles of Design" required>
+                    </div>
+
+                    <!-- Dynamic Fields -->
+                    <div id="dynamic-fields">
+                        <!-- Fields for Website -->
+                        <div class="source-fields" id="website-fields">
+                             <div class="form-group">
+                                <label for="website-title">Website Name</label>
+                                <input type="text" id="website-title" placeholder="e.g., Awesome Design Blog">
+                            </div>
+                            <div class="form-group">
+                                <label for="url">URL</label>
+                                <input type="url" id="url" placeholder="https://example.com/article">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="publish-year">Year Published</label>
+                                    <input type="number" id="publish-year" placeholder="e.g., 2023">
+                                </div>
+                                <div class="form-group">
+                                    <label for="publish-month">Month Published</label>
+                                    <input type="text" id="publish-month" placeholder="e.g., January">
+                                </div>
+                                <div class="form-group">
+                                    <label for="publish-day">Day Published</label>
+                                    <input type="number" id="publish-day" placeholder="e.g., 15">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fields for Book -->
+                        <div class="source-fields" id="book-fields" style="display:none;">
+                             <div class="form-row">
+                                <div class="form-group">
+                                    <label for="publisher">Publisher</label>
+                                    <input type="text" id="publisher" placeholder="e.g., Penguin Books">
+                                </div>
+                                <div class="form-group">
+                                    <label for="publish-location">Publication City</label>
+                                    <input type="text" id="publish-location" placeholder="e.g., New York">
+                                </div>
+                                <div class="form-group">
+                                    <label for="book-year">Year Published</label>
+                                    <input type="number" id="book-year" placeholder="e.g., 2021">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fields for Journal -->
+                        <div class="source-fields" id="journal-fields" style="display:none;">
+                            <div class="form-group">
+                                <label for="journal-name">Journal Name</label>
+                                <input type="text" id="journal-name" placeholder="e.g., Journal of Science">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="volume">Volume</label>
+                                    <input type="text" id="volume" placeholder="e.g., 22">
+                                </div>
+                                <div class="form-group">
+                                    <label for="issue">Issue</label>
+                                    <input type="text" id="issue" placeholder="e.g., 4">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pages">Page Range</label>
+                                    <input type="text" id="pages" placeholder="e.g., 112-125">
+                                </div>
+                                <div class="form-group">
+                                    <label for="journal-year">Year Published</label>
+                                    <input type="number" id="journal-year" placeholder="e.g., 2020">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="generate-button">Generate Citations</button>
+                </form>
+
+                <!-- Results -->
+                <div id="results-container">
+                    <div class="citation-box">
+                        <div class="citation-header">
+                            <h3>APA 7th Edition</h3>
+                            <button class="copy-button" data-target="apa-text">Copy</button>
+                        </div>
+                        <p class="citation-text" id="apa-text"></p>
+                    </div>
+                    <div class="citation-box">
+                        <div class="citation-header">
+                            <h3>MLA 9th Edition</h3>
+                            <button class="copy-button" data-target="mla-text">Copy</button>
+                        </div>
+                        <p class="citation-text" id="mla-text"></p>
+                    </div>
+                    <div class="citation-box">
+                        <div class="citation-header">
+                            <h3>Chicago 17th Edition</h3>
+                            <button class="copy-button" data-target="chicago-text">Copy</button>
+                        </div>
+                        <p class="citation-text" id="chicago-text"></p>
+                    </div>
+                </div>
+
+            </div>
         </div>
-
-        <p id="error" class="text-red-500 mt-2"></p>
-      </section>
-
-      <!-- Right side -->
-      <section class="p-4 border rounded bg-gray-50">
-        <h2 class="font-semibold mb-3">Generated citation</h2>
-        <div class="min-h-[150px] p-3 rounded bg-white border">
-          <p id="citation" class="whitespace-pre-wrap text-sm text-gray-800">
-            Your generated citation will appear here after you click 'Generate'.
-          </p>
-        </div>
-      </section>
     </main>
-  </div>
-</div>
 
-<script>
-let fields = {
-  authors: "Authors (Last, First; Last, First)",
-  year: "Year",
-  title: "Title",
-  edition: "Edition",
-  publisher: "Publisher / Site name",
-  city: "City",
-  journal: "Journal Title",
-  volume: "Volume",
-  issue: "Issue",
-  pages: "Pages",
-  doi: "DOI",
-  url: "URL",
-  accessDate: "Access Date"
-};
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sourceTypeSelect = document.getElementById('source-type');
+            const dynamicFieldsContainer = document.getElementById('dynamic-fields');
+            const citationForm = document.getElementById('citation-form');
+            const resultsContainer = document.getElementById('results-container');
 
-function renderFields() {
-  let type = document.getElementById("type").value;
-  let html = "";
-  for (let key in fields) {
-    if (
-      (type === "book" && ["authors","year","title","edition","publisher","city"].includes(key)) ||
-      (type === "journal" && ["authors","year","title","journal","volume","issue","pages","doi"].includes(key)) ||
-      (type === "website" && ["authors","year","title","publisher","url","accessDate"].includes(key))
-    ) {
-      html += `<label class="text-sm">${fields[key]}</label>
-               <input id="${key}" class="w-full border p-2 rounded mb-2" placeholder="${fields[key]}">`;
-    }
-  }
-  document.getElementById("inputs").innerHTML = html;
-}
+            // --- DYNAMIC FORM LOGIC ---
+            sourceTypeSelect.addEventListener('change', () => {
+                // Hide all fieldsets
+                dynamicFieldsContainer.querySelectorAll('.source-fields').forEach(field => {
+                    field.style.display = 'none';
+                });
+                // Show the selected one
+                const selectedFields = document.getElementById(`${sourceTypeSelect.value}-fields`);
+                if (selectedFields) {
+                    selectedFields.style.display = 'block';
+                }
+            });
 
-function parseAuthors(raw) {
-  if (!raw) return [];
-  return raw.split(";").map(a => {
-    let parts = a.split(",").map(p => p.trim());
-    return { last: parts[0] || "", first: parts[1] || "" };
-  });
-}
+            // --- CITATION GENERATION LOGIC ---
+            citationForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Collect common data
+                const sourceType = sourceTypeSelect.value;
+                const authorFirst = document.getElementById('author-first').value.trim();
+                const authorLast = document.getElementById('author-last').value.trim();
+                const title = document.getElementById('title').value.trim();
+                
+                const authorInitial = authorFirst ? `${authorFirst.charAt(0)}.` : '';
+                const authorFullName = `${authorFirst} ${authorLast}`.trim();
 
-function formatAuthorsAPA(authors) {
-  if (!authors.length) return "";
-  if (authors.length === 1) return `${authors[0].last}, ${authors[0].first.charAt(0)}.`;
-  if (authors.length === 2) return `${authors[0].last}, ${authors[0].first.charAt(0)}., & ${authors[1].last}, ${authors[1].first.charAt(0)}.`;
-  return `${authors[0].last}, ${authors[0].first.charAt(0)}., ${authors[1].last}, ${authors[1].first.charAt(0)}., & ${authors[2].last}, ${authors[2].first.charAt(0)}.`;
-}
+                let apa = '', mla = '', chicago = '';
 
-function generateCitation() {
-  let style = document.getElementById("style").value;
-  let type = document.getElementById("type").value;
-  let authors = parseAuthors(document.getElementById("authors").value || "");
-  let year = document.getElementById("year")?.value || "n.d.";
-  let title = document.getElementById("title")?.value || "(No title)";
-  let citation = "";
+                // Generate based on source type
+                if (sourceType === 'website') {
+                    const siteTitle = document.getElementById('website-title').value.trim();
+                    const url = document.getElementById('url').value.trim();
+                    const year = document.getElementById('publish-year').value.trim();
+                    const month = document.getElementById('publish-month').value.trim();
+                    const day = document.getElementById('publish-day').value.trim();
+                    const date = [year, month, day].filter(Boolean).join(', ');
 
-  if (style === "APA" && type === "book") {
-    citation = `${formatAuthorsAPA(authors)} (${year}). ${title}. ${document.getElementById("publisher")?.value || "(No publisher)"}.`;
-  } 
-  else if (style === "APA" && type === "journal") {
-    citation = `${formatAuthorsAPA(authors)} (${year}). ${title}. ${document.getElementById("journal")?.value || "(No journal)"}.`;
-  }
-  else if (style === "APA" && type === "website") {
-    citation = `${formatAuthorsAPA(authors)} (${year}). ${title}. ${document.getElementById("url")?.value || "(No URL)"}`;
-  }
+                    // APA
+                    apa = `${authorLast}, ${authorInitial} (${year || 'n.d.'}). <i>${title}</i>. ${siteTitle}. Retrieved ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}, from ${url}`;
+                    // MLA
+                    mla = `${authorLast}, ${authorFirst}. "${title}." <i>${siteTitle}</i>, ${date}, ${url}.`;
+                    // Chicago
+                    chicago = `${authorLast}, ${authorFirst}. "${title}." ${siteTitle}. Last modified ${date}. ${url}.`;
+                } else if (sourceType === 'book') {
+                    const publisher = document.getElementById('publisher').value.trim();
+                    const location = document.getElementById('publish-location').value.trim();
+                    const year = document.getElementById('book-year').value.trim();
+                    
+                    // APA
+                    apa = `${authorLast}, ${authorInitial} (${year}). <i>${title}</i>. ${publisher}.`;
+                    // MLA
+                    mla = `${authorLast}, ${authorFirst}. <i>${title}</i>. ${publisher}, ${year}.`;
+                    // Chicago
+                    chicago = `${authorLast}, ${authorFirst}. <i>${title}</i>. ${location}: ${publisher}, ${year}.`;
+                } else if (sourceType === 'journal') {
+                    const journalName = document.getElementById('journal-name').value.trim();
+                    const volume = document.getElementById('volume').value.trim();
+                    const issue = document.getElementById('issue').value.trim();
+                    const pages = document.getElementById('pages').value.trim();
+                    const year = document.getElementById('journal-year').value.trim();
+                    
+                    // APA
+                    apa = `${authorLast}, ${authorInitial} (${year}). ${title}. <i>${journalName}</i>, <i>${volume}</i>(${issue}), ${pages}.`;
+                    // MLA
+                    mla = `${authorLast}, ${authorFirst}. "${title}." <i>${journalName}</i>, vol. ${volume}, no. ${issue}, ${year}, pp. ${pages}.`;
+                    // Chicago
+                    chicago = `${authorLast}, ${authorFirst}. "${title}." <i>${journalName}</i> ${volume}, no. ${issue} (${year}): ${pages}.`;
+                }
+                
+                // Display results
+                document.getElementById('apa-text').innerHTML = apa.replace(/n\.d\./g, 'n.d.');
+                document.getElementById('mla-text').innerHTML = mla;
+                document.getElementById('chicago-text').innerHTML = chicago;
+                resultsContainer.style.display = 'block';
+            });
 
-  document.getElementById("citation").innerText = citation;
-}
-
-function copyCitation() {
-  let citation = document.getElementById("citation").innerText;
-  navigator.clipboard.writeText(citation).then(() => alert("Copied!"));
-}
-
-function resetForm() {
-  renderFields();
-  document.getElementById("citation").innerText = "Your generated citation will appear here after you click 'Generate'.";
-}
-
-document.getElementById("type").addEventListener("change", renderFields);
-renderFields();
-</script>
+            // --- COPY TO CLIPBOARD LOGIC ---
+            resultsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('copy-button')) {
+                    const targetId = e.target.dataset.target;
+                    const textToCopy = document.getElementById(targetId).innerText;
+                    
+                    // Use a temporary textarea to copy
+                    const textArea = document.createElement('textarea');
+                    textArea.value = textToCopy;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    // Provide user feedback
+                    e.target.textContent = 'Copied!';
+                    setTimeout(() => {
+                        e.target.textContent = 'Copy';
+                    }, 2000);
+                }
+            });
+            
+            // Trigger change event on load to set initial fields
+            sourceTypeSelect.dispatchEvent(new Event('change'));
+        });
+    </script>
+</body>
+</html>
