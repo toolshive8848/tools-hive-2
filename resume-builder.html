@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder & Optimizer - ToolHive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lora:wght@400;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- External Libraries for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* ─────────────────── GLOBAL STYLES & VARIABLES ─────────────────── */
+        :root {
+            --primary-color: #2563EB;
+            --secondary-accent: #FBBF24;
+            --background-color: #F3F4F6;
+            --heading-color: #1F2937;
+            --body-text-color: #4B5563;
+            --cta-color: #10B981;
+            --white-color: #FFFFFF;
+            --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--body-text-color); line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; width: 100%; }
+
+        /* ────────────────────────── HEADER ────────────────────────── */
+        .site-header { background-color: var(--white-color); padding: 1rem 0; box-shadow: var(--soft-shadow); width: 100%; position: sticky; top: 0; z-index: 1000; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .main-nav a { color: var(--body-text-color); font-weight: 600; text-decoration: none; transition: color 0.3s ease; }
+        .main-nav a:hover { color: var(--primary-color); }
+
+        /* ─────────────────── BUILDER STYLES ─────────────────── */
+        main { padding: 2rem 0; }
+        .builder-layout { display: grid; grid-template-columns: 450px 1fr; gap: 2rem; align-items: flex-start; }
+
+        /* Input Panel */
+        .input-panel { background-color: var(--white-color); border-radius: 16px; box-shadow: var(--soft-shadow); position: sticky; top: 100px; max-height: calc(100vh - 120px); overflow-y: auto; }
+        .input-panel-header { padding: 1.5rem; border-bottom: 1px solid #E5E7EB; }
+        .input-panel-header h2 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+        .form-section { padding: 1.5rem; border-bottom: 1px solid #E5E7EB; }
+        .form-section:last-child { border-bottom: none; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--heading-color); }
+        .form-group input, .form-group textarea { width: 100%; padding: 0.8rem 1rem; font-size: 1rem; font-family: 'Poppins', sans-serif; border-radius: 8px; border: 2px solid #E5E7EB; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); }
+        #photo-upload-group { display: none; } /* Hidden by default */
+
+        /* Dynamic Entry Cards */
+        .entry-card { border: 1px solid #E5E7EB; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background-color: #F9FAFB; }
+        .entry-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .entry-card-header h4 { font-size: 1.1rem; color: var(--heading-color); }
+        .add-btn { background-color: var(--primary-color); color: white; padding: 0.6rem 1.2rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: block; width: 100%; }
+        .remove-btn { background-color: #EF4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-weight: bold; cursor: pointer; line-height: 28px; text-align: center; }
+
+        /* Preview Panel */
+        .preview-panel-container { position: sticky; top: 100px; }
+        .preview-controls { background-color: var(--white-color); padding: 1rem; border-radius: 12px; box-shadow: var(--soft-shadow); margin-bottom: 1.5rem; text-align: center; }
+        .download-btn { background-color: var(--cta-color); color: white; padding: 0.8rem 1.5rem; font-size: 1.1rem; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; }
+        #template-selector { margin-top: 1rem; }
+        .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; margin-top: 0.5rem; }
+        
+        /* Template Thumbnail Previews */
+        .template-option { border: 2px solid #E5E7EB; border-radius: 8px; padding: 0.5rem; text-align: left; cursor: pointer; transition: all 0.2s ease; background-color: white; }
+        .template-option.selected { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3); }
+        .template-option p { font-size: 0.9rem; font-weight: 600; margin-top: 0.5rem; text-align: center; }
+        .thumbnail-preview { height: 140px; overflow: hidden; font-size: 5px; line-height: 1.4; border: 1px solid #ccc; }
+        .thumb-header { padding: 5px; text-align: center; }
+        .thumb-title { font-weight: bold; font-size: 8px; }
+        .thumb-section { font-weight: bold; border-bottom: 1px solid #eee; margin-top: 5px; font-size: 6px; }
+        .thumb-sidebar { float: left; width: 30%; height: 140px; padding: 5px; }
+        .thumb-main { float: left; width: 70%; padding-left: 5px; }
+        .thumb-photo { width: 20px; height: 20px; border-radius: 50%; margin: 0 auto 5px; background-color: #ccc; }
+
+        #resume-preview { background-color: var(--white-color); box-shadow: var(--soft-shadow); width: 8.5in; height: 11in; margin: 0 auto; transform-origin: top center; transform: scale(0.8); transition: all 0.3s ease; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .builder-layout { grid-template-columns: 1fr; }
+            .input-panel, .preview-panel-container { position: static; max-height: none; }
+            #resume-preview { transform: scale(1); width: 100%; height: auto; min-height: 11in; }
+        }
+        
+        /* ─────────────────── TEMPLATE STYLES ─────────────────── */
+        .resume-body { padding: 0.75in; font-family: 'Roboto', sans-serif; color: #333; font-size: 10.5pt; }
+        .resume-body h1, .resume-body h2, .resume-body h3, .resume-body h4 { margin: 0; padding: 0; }
+        .resume-body ul { list-style-type: disc; padding-left: 20px; }
+        
+        /* --- ATS: Classic --- */
+        .ats-classic .header { text-align: center; margin-bottom: 25px; }
+        .ats-classic .name { font-family: 'Lora', serif; font-size: 28pt; font-weight: bold; letter-spacing: 2px; }
+        .ats-classic .contact-info { font-size: 11pt; margin-top: 5px; }
+        .ats-classic .section-title { font-family: 'Poppins', sans-serif; font-size: 14pt; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #000; margin-top: 20px; padding-bottom: 4px; }
+        .ats-classic .entry { margin: 10px 0; }
+        .ats-classic .entry-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 11pt; }
+        .ats-classic .entry-subheader { font-style: italic; color: #555; font-size: 10pt; }
+        
+        /* --- ATS: Compact --- */
+        .ats-compact .name { font-size: 24pt; font-weight: bold; }
+        .ats-compact .contact-info { display: flex; flex-wrap: wrap; gap: 15px; font-size: 10pt; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 15px; }
+        .ats-compact .section-title { font-size: 12pt; font-weight: bold; text-transform: uppercase; margin-top: 15px; }
+        .ats-compact .entry { margin-bottom: 10px; }
+        .ats-compact .entry-header { font-weight: bold; }
+        .ats-compact .entry-subheader { font-style: italic; }
+
+        /* --- ATS: Professional --- */
+        .ats-professional { font-family: 'Lora', serif; }
+        .ats-professional .header { border-bottom: 4px solid var(--primary-color); padding-bottom: 10px; margin-bottom: 20px; }
+        .ats-professional .name { font-size: 32pt; }
+        .ats-professional .job-title { font-size: 14pt; color: #555; }
+        .ats-professional .section-title { font-family: 'Poppins', sans-serif; font-size: 14pt; color: var(--primary-color); font-weight: bold; margin-top: 20px; }
+        
+        /* --- NORMAL: Modern --- */
+        .normal-modern { display: flex; padding: 0; height: 100%; }
+        .normal-modern .sidebar { background-color: var(--heading-color); color: white; width: 2.75in; height: 11in; padding: 0.75in; }
+        .normal-modern .main-content { width: 5.75in; padding: 0.75in; }
+        .normal-modern .profile-photo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-color); margin: 0 auto 20px; display: block; }
+        .normal-modern .name { font-family: 'Poppins', sans-serif; font-size: 24pt; line-height: 1.2; text-align: center; }
+        .normal-modern .sidebar .section-title { color: var(--secondary-accent); font-size: 14pt; font-weight: bold; margin-top: 25px; }
+        .normal-modern .main-content .section-title { color: var(--primary-color); font-size: 16pt; font-weight: bold; border-bottom: 2px solid var(--background-color); margin-bottom: 15px; padding-bottom: 5px; }
+        
+        /* --- NORMAL: Creative --- */
+        .normal-creative .header { background-color: var(--primary-color); color: white; padding: 20px; text-align: center; position: relative; }
+        .normal-creative .profile-photo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid white; margin-top: -70px; }
+        .normal-creative .name { font-size: 28pt; margin-top: 10px; }
+        .normal-creative .section-title { text-align: center; font-size: 16pt; margin-top: 20px; color: var(--heading-color); }
+        
+        /* --- NORMAL: Minimalist --- */
+        .normal-minimalist .header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #ccc; }
+        .normal-minimalist .profile-photo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; }
+        .normal-minimalist .name { font-size: 26pt; }
+        .normal-minimalist .entry-desc { list-style-type: none; padding-left: 0; }
+        .normal-minimalist .entry-desc li::before { content: '–'; margin-right: 10px; }
+
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">ToolHive</a>
+            <nav class="main-nav"><a href="index.html#tools">← Back to All Tools</a></nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="builder-layout">
+                <!-- Input Panel -->
+                <div class="input-panel">
+                    <div class="input-panel-header">
+                        <h2>Resume Content</h2>
+                        <p>Fill in your details. The preview will update live.</p>
+                    </div>
+                    <form id="resume-form">
+                        <div class="form-section">
+                            <h3>Personal Details</h3>
+                            <div class="form-group"><label for="full-name">Full Name</label><input type="text" id="full-name" placeholder="John Doe"></div>
+                            <div class="form-group"><label for="job-title">Job Title</label><input type="text" id="job-title" placeholder="Software Engineer"></div>
+                            <div class="form-group"><label for="email">Email</label><input type="email" id="email" placeholder="john.doe@email.com"></div>
+                            <div class="form-group"><label for="phone">Phone</label><input type="tel" id="phone" placeholder="123-456-7890"></div>
+                            <div class="form-group"><label for="address">Address / Location</label><input type="text" id="address" placeholder="City, State"></div>
+                            <div class="form-group" id="photo-upload-group">
+                                <label for="photo">Profile Photo</label>
+                                <input type="file" id="photo" accept="image/*">
+                            </div>
+                            <div class="form-group"><label for="summary">Professional Summary</label><textarea id="summary" placeholder="A brief summary of your career..."></textarea></div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3>Work Experience</h3>
+                            <div id="work-experience-list"></div>
+                            <button type="button" class="add-btn" id="add-experience">Add Experience</button>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Education</h3>
+                             <div id="education-list"></div>
+                            <button type="button" class="add-btn" id="add-education">Add Education</button>
+                        </div>
+                        
+                         <div class="form-section">
+                            <h3>Skills</h3>
+                             <div class="form-group"><label for="skills">Skills (comma separated)</label><input type="text" id="skills" placeholder="JavaScript, React, Node.js..."></div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Preview Panel -->
+                <div class="preview-panel-container">
+                    <div class="preview-controls">
+                        <button id="download-pdf" class="download-btn">Download as PDF</button>
+                        <div id="template-selector">
+                            <h4>Select a Template</h4>
+                            <div class="template-grid">
+                                <!-- ATS Templates -->
+                                <div class="template-option selected" data-template="ats-classic" data-type="ats">
+                                    <div class="thumbnail-preview"><div class="thumb-header"><div class="thumb-title">Classic</div></div><div class="thumb-body"><div class="thumb-section">Section</div></div></div>
+                                    <p>ATS Classic</p>
+                                </div>
+                                <div class="template-option" data-template="ats-compact" data-type="ats">
+                                     <div class="thumbnail-preview"><div class="thumb-header" style="background:none;color:#333;"><div class="thumb-title">Compact</div></div><div class="thumb-body"><div class="thumb-section">Section</div></div></div>
+                                    <p>ATS Compact</p>
+                                </div>
+                                <div class="template-option" data-template="ats-professional" data-type="ats">
+                                    <div class="thumbnail-preview"><div class="thumb-header" style="background:none;color:#333;border-bottom:2px solid var(--primary-color);"><div class="thumb-title">Professional</div></div></div>
+                                    <p>ATS Pro</p>
+                                </div>
+                                
+                                <!-- Normal Templates -->
+                                <div class="template-option" data-template="normal-modern" data-type="normal">
+                                    <div class="thumbnail-preview"><div class="thumb-sidebar" style="background-color: var(--heading-color);"><div class="thumb-photo"></div></div><div class="thumb-main"><div class="thumb-section">Section</div></div></div>
+                                    <p>Modern</p>
+                                </div>
+                                <div class="template-option" data-template="normal-creative" data-type="normal">
+                                    <div class="thumbnail-preview"><div class="thumb-header" style="background-color: var(--primary-color); height: 30px;"></div><div class="thumb-body" style="text-align:center;"><div class="thumb-photo" style="margin-top:-15px;"></div><div class="thumb-title">Creative</div></div></div>
+                                    <p>Creative</p>
+                                </div>
+                                <div class="template-option" data-template="normal-minimalist" data-type="normal">
+                                     <div class="thumbnail-preview"><div class="thumb-header" style="background:none;color:#333;"><div class="thumb-photo"></div><div class="thumb-title">Minimalist</div></div></div>
+                                    <p>Minimalist</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="resume-preview"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('resume-form');
+            const preview = document.getElementById('resume-preview');
+            const photoUploadGroup = document.getElementById('photo-upload-group');
+            let photoDataUrl = '';
+
+            // --- DATA GATHERING & PREVIEW UPDATE ---
+            function getFormData() {
+                return {
+                    name: form.querySelector('#full-name').value || 'Your Name',
+                    jobTitle: form.querySelector('#job-title').value || 'Job Title',
+                    email: form.querySelector('#email').value || 'your.email@server.com',
+                    phone: form.querySelector('#phone').value || '123-456-7890',
+                    address: form.querySelector('#address').value || 'City, Country',
+                    photo: photoDataUrl,
+                    summary: form.querySelector('#summary').value || 'Enter your professional summary here.',
+                    skills: form.querySelector('#skills').value.split(',').map(s => s.trim()).filter(s => s),
+                    experience: Array.from(document.querySelectorAll('#work-experience-list .entry-card')).map(item => ({
+                        title: item.querySelector('[data-type="exp-title"]').value,
+                        company: item.querySelector('[data-type="exp-company"]').value,
+                        date: item.querySelector('[data-type="exp-date"]').value,
+                        desc: item.querySelector('[data-type="exp-desc"]').value,
+                    })),
+                    education: Array.from(document.querySelectorAll('#education-list .entry-card')).map(item => ({
+                        degree: item.querySelector('[data-type="edu-degree"]').value,
+                        school: item.querySelector('[data-type="edu-school"]').value,
+                        date: item.querySelector('[data-type="edu-date"]').value,
+                    })),
+                };
+            }
+
+            function updatePreview() {
+                const template = document.querySelector('.template-option.selected').dataset.template;
+                const data = getFormData();
+                renderTemplate(template, data);
+            }
+
+            form.addEventListener('input', updatePreview);
+            
+            // Handle photo upload
+            document.getElementById('photo').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        photoDataUrl = event.target.result;
+                        updatePreview();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // --- TEMPLATE RENDERING LOGIC ---
+            function renderTemplate(templateId, data) {
+                let html = `<div class="resume-body ${templateId}">`;
+                const photoHtml = data.photo ? `<img src="${data.photo}" class="profile-photo" alt="Profile">` : '';
+
+                switch(templateId) {
+                    case 'ats-classic':
+                        html += `<div class="header"><div class="name">${data.name}</div><div class="contact-info">${data.phone} | ${data.email} | ${data.address}</div></div><div class="section-title">Summary</div><p>${data.summary}</p><div class="section-title">Experience</div>${data.experience.map(exp => `<div class="entry"><div class="entry-header"><span>${exp.title}</span> <span>${exp.date}</span></div><div class="entry-subheader">${exp.company}</div><ul class="entry-desc">${exp.desc.split('\n').map(line => `<li>${line}</li>`).join('')}</ul></div>`).join('')}<div class="section-title">Education</div>${data.education.map(edu => `<div class="entry"><div class="entry-header"><span>${edu.degree}</span> <span>${edu.date}</span></div><div class="entry-subheader">${edu.school}</div></div>`).join('')}<div class="section-title">Skills</div><p>${data.skills.join(' &bull; ')}</p>`;
+                        break;
+                    case 'ats-compact':
+                        html += `<div class="name">${data.name}</div><div class="job-title">${data.jobTitle}</div><div class="contact-info"><span>${data.phone}</span><span>${data.email}</span><span>${data.address}</span></div><div class="section-title">Summary</div><p>${data.summary}</p><div class="section-title">Experience</div>${data.experience.map(exp => `<div class="entry"><div class="entry-header">${exp.title} - ${exp.company}</div><div class="entry-subheader">${exp.date}</div><ul>${exp.desc.split('\n').map(line => `<li>${line}</li>`).join('')}</ul></div>`).join('')}`;
+                        break;
+                    case 'ats-professional':
+                        html += `<div class="header"><div class="name">${data.name}</div><div class="job-title">${data.jobTitle}</div></div><p>${data.summary}</p><div class="section-title">Contact Information</div><p>${data.phone} | ${data.email} | ${data.address}</p><div class="section-title">Experience</div>${data.experience.map(exp => `<div class="entry"><div class="entry-header"><h4>${exp.title}</h4><span>${exp.date}</span></div><div class="entry-subheader">${exp.company}</div><ul>${exp.desc.split('\n').map(line => `<li>${line}</li>`).join('')}</ul></div>`).join('')}`;
+                        break;
+                    case 'normal-modern':
+                        html += `<div class="sidebar">${photoHtml}<h1 class="name">${data.name}</h1><div class="section-title">Contact</div><p><strong>Email:</strong><br>${data.email}</p><p><strong>Phone:</strong><br>${data.phone}</p><div class="section-title">Skills</div><ul>${data.skills.map(s => `<li>${s}</li>`).join('')}</ul></div><div class="main-content"><div class="section-title">Summary</div><p>${data.summary}</p><div class="section-title">Experience</div>${data.experience.map(exp => `<div class="entry"><div class="entry-header">${exp.title}</div><div class="entry-subheader">${exp.company} | ${exp.date}</div><ul>${exp.desc.split('\n').map(line => `<li>${line}</li>`).join('')}</ul></div>`).join('')}</div>`;
+                        break;
+                    case 'normal-creative':
+                        html += `<div class="header"><p>${data.phone} | ${data.email}</p></div><div style="text-align:center;">${photoHtml}<h1 class="name">${data.name}</h1><p>${data.jobTitle}</p></div><div class="section-title">Summary</div><p>${data.summary}</p><div class="section-title">Experience</div>${data.experience.map(exp => `<div class="entry"><div class="entry-header">${exp.title}</div><div class="entry-subheader">${exp.company} | ${exp.date}</div><ul>${exp.desc.split('\n').map(line => `<li>${line}</li>`).join('')}</ul></div>`).join('')}`;
+                        break;
+                    case 'normal-minimalist':
+                        html += `<div class="header">${photoHtml}<h1 class="name">${data.name}</h1><p>${data.jobTitle}</p><p>${data.phone} | ${data.email}</p></div><div class="section-title">Experience</div>${data.experience.map(exp => `<div class="entry"><div class="entry-header">${exp.title}</div><div class="entry-subheader">${exp.company} | ${exp.date}</div><ul class="entry-desc">${exp.desc.split('\n').map(line => `<li>${line}</li>`).join('')}</ul></div>`).join('')}`;
+                        break;
+                }
+                
+                html += `</div>`;
+                preview.innerHTML = html;
+            }
+            
+            // --- ADD/REMOVE DYNAMIC ENTRIES ---
+            function createEntry(type) {
+                const isExperience = type === 'experience';
+                const list = document.getElementById(isExperience ? 'work-experience-list' : 'education-list');
+                const card = document.createElement('div');
+                card.className = 'entry-card';
+                
+                const header = document.createElement('div');
+                header.className = 'entry-card-header';
+                header.innerHTML = `<h4>New ${isExperience ? 'Experience' : 'Education'} Entry</h4>`;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-btn';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = () => { list.removeChild(card); updatePreview(); };
+                header.appendChild(removeBtn);
+                
+                if (isExperience) {
+                    card.innerHTML = `<div class="form-group"><input type="text" data-type="exp-title" placeholder="Job Title"></div><div class="form-group"><input type="text" data-type="exp-company" placeholder="Company"></div><div class="form-group"><input type="text" data-type="exp-date" placeholder="e.g., Jan 2020 - Present"></div><div class="form-group"><textarea data-type="exp-desc" placeholder="Describe your role..."></textarea></div>`;
+                } else {
+                     card.innerHTML = `<div class="form-group"><input type="text" data-type="edu-degree" placeholder="Degree / Certificate"></div><div class="form-group"><input type="text" data-type="edu-school" placeholder="School / Institution"></div><div class="form-group"><input type="text" data-type="edu-date" placeholder="e.g., 2016 - 2020"></div>`;
+                }
+                card.insertBefore(header, card.firstChild);
+                list.appendChild(card);
+            }
+
+            document.getElementById('add-experience').addEventListener('click', () => createEntry('experience'));
+            document.getElementById('add-education').addEventListener('click', () => createEntry('education'));
+            
+            // --- TEMPLATE SELECTION ---
+            document.querySelectorAll('.template-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelector('.template-option.selected').classList.remove('selected');
+                    option.classList.add('selected');
+                    
+                    // Show/hide photo upload based on template type
+                    photoUploadGroup.style.display = option.dataset.type === 'normal' ? 'block' : 'none';
+                    
+                    updatePreview();
+                });
+            });
+
+            // --- PDF DOWNLOAD ---
+            document.getElementById('download-pdf').addEventListener('click', () => {
+                const { jsPDF } = window.jspdf;
+                const resumeElement = document.getElementById('resume-preview');
+                const originalScale = resumeElement.style.transform;
+                resumeElement.style.transform = 'scale(1)';
+                
+                html2canvas(resumeElement, { scale: 2, useCORS: true }).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF({ orientation: 'p', unit: 'in', format: 'letter' });
+                    pdf.addImage(imgData, 'PNG', 0, 0, 8.5, 11);
+                    pdf.save('ToolHive_Resume.pdf');
+                    resumeElement.style.transform = originalScale;
+                });
+            });
+
+            // Initial render
+            updatePreview();
+        });
+    </script>
+</body>
+</html>
