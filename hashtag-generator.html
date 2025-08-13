@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hashtag Generator - ToolHive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ─────────────────── GLOBAL STYLES & VARIABLES ─────────────────── */
+        :root {
+            --primary-color: #2563EB;
+            --secondary-accent: #FBBF24;
+            --background-color: #F3F4F6;
+            --heading-color: #1F2937;
+            --body-text-color: #4B5563;
+            --cta-color: #10B981;
+            --white-color: #FFFFFF;
+            --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--body-text-color); line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; padding: 0 20px; width: 100%; }
+
+        /* ────────────────────────── HEADER ────────────────────────── */
+        .site-header { background-color: var(--white-color); padding: 1rem 0; box-shadow: var(--soft-shadow); width: 100%; position: sticky; top: 0; z-index: 1000; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .main-nav a { color: var(--body-text-color); font-weight: 600; text-decoration: none; transition: color 0.3s ease; }
+        .main-nav a:hover { color: var(--primary-color); }
+
+        /* ─────────────────── GENERATOR STYLES ─────────────────── */
+        main { padding: 3rem 0; }
+        .generator-wrapper { background-color: var(--white-color); padding: 2.5rem; border-radius: 16px; box-shadow: var(--soft-shadow); }
+        .tool-title { text-align: center; margin-bottom: 2rem; }
+        .tool-title h1 { font-size: 2.2rem; }
+        .tool-title p { font-size: 1.1rem; margin-top: 0.5rem; }
+
+        .generator-form { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        #keyword-input { flex-grow: 1; padding: 0.8rem 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid #E5E7EB; }
+        #keyword-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); }
+        .generate-btn { background-color: var(--primary-color); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; }
+
+        .results-area { min-height: 100px; }
+        .loader { width: 48px; height: 48px; border: 5px solid var(--primary-color); border-bottom-color: transparent; border-radius: 50%; display: none; margin: 2rem auto; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #hashtags-container { display: flex; flex-wrap: wrap; gap: 0.75rem; padding: 1rem; background-color: var(--background-color); border-radius: 8px; }
+        .hashtag { background-color: var(--white-color); color: var(--primary-color); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 500; border: 1px solid var(--primary-color); cursor: pointer; transition: background-color 0.2s; }
+        .hashtag:hover { background-color: #EBF2FF; }
+
+        .copy-area { margin-top: 2rem; text-align: center; }
+        .copy-btn { background-color: var(--cta-color); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; display: none; }
+
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">ToolHive</a>
+            <nav class="main-nav"><a href="index.html#tools">← Back to All Tools</a></nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="generator-wrapper">
+                <div class="tool-title">
+                    <h1>🎨 Hashtag Generator</h1>
+                    <p>Enter a keyword to discover relevant hashtags for your social media.</p>
+                </div>
+
+                <form class="generator-form" id="generator-form">
+                    <input type="text" id="keyword-input" placeholder="e.g., digital marketing" required>
+                    <button type="submit" class="generate-btn">Generate</button>
+                </form>
+
+                <div class="results-area">
+                    <div class="loader" id="loader"></div>
+                    <div id="hashtags-container"></div>
+                </div>
+                
+                <div class="copy-area">
+                    <button class="copy-btn" id="copy-btn">Copy All Hashtags</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('generator-form');
+            const input = document.getElementById('keyword-input');
+            const container = document.getElementById('hashtags-container');
+            const loader = document.getElementById('loader');
+            const copyBtn = document.getElementById('copy-btn');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const keyword = input.value.trim();
+                if (!keyword) return;
+
+                container.innerHTML = '';
+                copyBtn.style.display = 'none';
+                loader.style.display = 'block';
+
+                try {
+                    // Fetch related words from Datamuse API
+                    const response = await fetch(`https://api.datamuse.com/words?ml=${keyword}&max=30`);
+                    const data = await response.json();
+
+                    if (data.length === 0) {
+                        container.innerHTML = '<p>No hashtags found. Try a different keyword.</p>';
+                    } else {
+                        displayHashtags(data);
+                        copyBtn.style.display = 'inline-block';
+                    }
+                } catch (error) {
+                    console.error('Error fetching hashtags:', error);
+                    container.innerHTML = '<p>Sorry, something went wrong. Please try again later.</p>';
+                } finally {
+                    loader.style.display = 'none';
+                }
+            });
+
+            function displayHashtags(words) {
+                container.innerHTML = ''; // Clear previous results
+                const hashtags = words.map(word => `#${word.word.replace(/\s+/g, '')}`);
+                
+                hashtags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'hashtag';
+                    tagElement.textContent = tag;
+                    container.appendChild(tagElement);
+                });
+            }
+
+            copyBtn.addEventListener('click', () => {
+                const hashtags = Array.from(container.children).map(el => el.textContent).join(' ');
+                
+                // Use a temporary textarea to copy
+                const textArea = document.createElement('textarea');
+                textArea.value = hashtags;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy All Hashtags';
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
