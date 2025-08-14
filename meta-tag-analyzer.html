@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Tag Analyzer - ToolHive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* ─────────────────── GLOBAL STYLES & VARIABLES ─────────────────── */
+        :root {
+            --primary-color: #2563EB;
+            --secondary-accent: #FBBF24;
+            --background-color: #F3F4F6;
+            --heading-color: #1F2937;
+            --body-text-color: #4B5563;
+            --cta-color: #10B981;
+            --white-color: #FFFFFF;
+            --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --success-bg: #D1FAE5;
+            --success-text: #065F46;
+            --warning-bg: #FEF3C7;
+            --warning-text: #92400E;
+            --error-bg: #FEE2E2;
+            --error-text: #991B1B;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--body-text-color); line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; width: 100%; }
+
+        /* ────────────────────────── HEADER ────────────────────────── */
+        .site-header { background-color: var(--white-color); padding: 1rem 0; box-shadow: var(--soft-shadow); width: 100%; position: sticky; top: 0; z-index: 1000; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .main-nav a { color: var(--body-text-color); font-weight: 600; text-decoration: none; transition: color 0.3s ease; }
+        .main-nav a:hover { color: var(--primary-color); }
+
+        /* ─────────────────── ANALYZER STYLES ─────────────────── */
+        main { padding: 3rem 0; }
+        .analyzer-wrapper { background-color: var(--white-color); padding: 2.5rem; border-radius: 16px; box-shadow: var(--soft-shadow); }
+        .tool-title { text-align: center; margin-bottom: 2rem; }
+        .tool-title h1 { font-size: 2.2rem; }
+        .tool-title p { font-size: 1.1rem; margin-top: 0.5rem; }
+
+        .analyzer-form { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        #url-input { flex-grow: 1; padding: 0.8rem 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid #E5E7EB; }
+        #url-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); }
+        .analyze-btn { background-color: var(--primary-color); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; }
+        .analyze-btn:disabled { background-color: #9CA3AF; cursor: not-allowed; }
+
+        .results-area { min-height: 100px; }
+        .loader { width: 48px; height: 48px; border: 5px solid var(--primary-color); border-bottom-color: transparent; border-radius: 50%; display: none; margin: 2rem auto; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        #analysis-results { display: none; }
+        .result-section { margin-bottom: 2rem; }
+        .result-section h2 { font-size: 1.5rem; color: var(--heading-color); border-bottom: 2px solid var(--background-color); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .result-item { display: grid; grid-template-columns: 150px 1fr; gap: 1rem; align-items: start; padding: 0.75rem 0; border-bottom: 1px solid #E5E7EB; }
+        .result-item:last-child { border-bottom: none; }
+        .result-item dt { font-weight: 600; color: var(--heading-color); }
+        .result-item dd { font-family: 'Roboto Mono', monospace; word-break: break-all; }
+        .result-item .recommendation { grid-column: 2; font-size: 0.9rem; padding: 0.5rem; border-radius: 6px; margin-top: 0.5rem; }
+        .recommendation.good { background-color: var(--success-bg); color: var(--success-text); }
+        .recommendation.warning { background-color: var(--warning-bg); color: var(--warning-text); }
+        .recommendation.bad { background-color: var(--error-bg); color: var(--error-text); }
+        .error-message { text-align: center; color: var(--error-text); font-weight: 600; padding: 1rem; background-color: var(--error-bg); border-radius: 8px; }
+
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">ToolHive</a>
+            <nav class="main-nav"><a href="index.html#tools">← Back to All Tools</a></nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="analyzer-wrapper">
+                <div class="tool-title">
+                    <h1>🔍 Meta Tag Analyzer</h1>
+                    <p>Enter a URL to analyze its meta tags, headings, and other SEO elements.</p>
+                </div>
+
+                <form class="analyzer-form" id="analyzer-form">
+                    <input type="url" id="url-input" placeholder="https://example.com" required>
+                    <button type="submit" class="analyze-btn" id="analyze-btn">Analyze</button>
+                </form>
+
+                <div class="results-area" id="results-area">
+                    <div class="loader" id="loader"></div>
+                    <div id="analysis-results"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('analyzer-form');
+            const input = document.getElementById('url-input');
+            const button = document.getElementById('analyze-btn');
+            const resultsContainer = document.getElementById('analysis-results');
+            const loader = document.getElementById('loader');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const url = input.value.trim();
+                if (!url) return;
+
+                resultsContainer.innerHTML = '';
+                resultsContainer.style.display = 'none';
+                loader.style.display = 'block';
+                button.disabled = true;
+
+                try {
+                    const html = await fetchUrl(url);
+                    const analysis = parseHtml(html, url);
+                    displayResults(analysis);
+                } catch (error) {
+                    console.error('Analysis Error:', error);
+                    resultsContainer.innerHTML = `<div class="error-message">Could not fetch or analyze the URL. Please check the URL and make sure the site is accessible.</div>`;
+                    resultsContainer.style.display = 'block';
+                } finally {
+                    loader.style.display = 'none';
+                    button.disabled = false;
+                }
+            });
+            
+            async function fetchUrl(url) {
+                // Using a CORS proxy to bypass browser security for fetching external sites
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.text();
+            }
+
+            function parseHtml(html, baseUrl) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                const getMeta = (name) => doc.querySelector(`meta[name="${name}"]`)?.getAttribute('content') || null;
+                const getProperty = (prop) => doc.querySelector(`meta[property="${prop}"]`)?.getAttribute('content') || null;
+                const getLink = (rel) => doc.querySelector(`link[rel="${rel}"]`)?.getAttribute('href') || null;
+
+                const resolveUrl = (path) => {
+                    if (!path || path.startsWith('http') || path.startsWith('data:')) return path;
+                    try {
+                        return new URL(path, baseUrl).href;
+                    } catch (e) {
+                        return path; // Return as is if invalid
+                    }
+                };
+
+                return {
+                    title: doc.querySelector('title')?.innerText || null,
+                    description: getMeta('description'),
+                    keywords: getMeta('keywords'),
+                    robots: getMeta('robots'),
+                    canonical: resolveUrl(getLink('canonical')),
+                    favicon: resolveUrl(getLink('icon') || getLink('shortcut icon')),
+                    og: {
+                        title: getProperty('og:title'),
+                        description: getProperty('og:description'),
+                        image: resolveUrl(getProperty('og:image')),
+                        url: resolveUrl(getProperty('og:url')),
+                    },
+                    twitter: {
+                        card: getMeta('twitter:card'),
+                        title: getMeta('twitter:title'),
+                        description: getMeta('twitter:description'),
+                        image: resolveUrl(getMeta('twitter:image')),
+                    },
+                    headings: {
+                        h1: Array.from(doc.querySelectorAll('h1')).map(h => h.innerText),
+                        h2: Array.from(doc.querySelectorAll('h2')).map(h => h.innerText),
+                    },
+                    images: Array.from(doc.querySelectorAll('img')).map(img => ({
+                        src: resolveUrl(img.getAttribute('src')),
+                        alt: img.getAttribute('alt'),
+                    }))
+                };
+            }
+
+            function displayResults(data) {
+                resultsContainer.innerHTML = `
+                    ${createSection('Primary Meta Tags', [
+                        createItem('Title', data.title, checkLength(data.title, 50, 60)),
+                        createItem('Description', data.description, checkLength(data.description, 150, 160)),
+                        createItem('Keywords', data.keywords, data.keywords ? 'Present, though less important for modern SEO.' : 'Missing.'),
+                        createItem('Robots Tag', data.robots, data.robots ? `Directives: ${data.robots}` : 'Not found. Defaults to "index, follow".'),
+                        createItem('Canonical URL', data.canonical, data.canonical ? 'Canonical tag is present.' : 'Missing. Important for preventing duplicate content issues.'),
+                        createItem('Favicon', data.favicon, data.favicon ? 'Favicon link found.' : 'Missing favicon link.')
+                    ])}
+                    ${createSection('Open Graph (Facebook, LinkedIn)', [
+                        createItem('OG Title', data.og.title, checkRequired(data.og.title)),
+                        createItem('OG Description', data.og.description, checkRequired(data.og.description)),
+                        createItem('OG Image', data.og.image, checkRequired(data.og.image)),
+                        createItem('OG URL', data.og.url, checkRequired(data.og.url))
+                    ])}
+                    ${createSection('Twitter Card', [
+                        createItem('Twitter Card', data.twitter.card, checkRequired(data.twitter.card)),
+                        createItem('Twitter Title', data.twitter.title, checkRequired(data.twitter.title)),
+                        createItem('Twitter Description', data.twitter.description, checkRequired(data.twitter.description)),
+                        createItem('Twitter Image', data.twitter.image, checkRequired(data.twitter.image))
+                    ])}
+                    ${createHeadingsSection(data.headings)}
+                    ${createImagesSection(data.images)}
+                `;
+                resultsContainer.style.display = 'block';
+            }
+            
+            // --- HELPER FUNCTIONS FOR DISPLAY ---
+            function createSection(title, itemsHtml) {
+                if (!itemsHtml || itemsHtml.length === 0) return '';
+                return `<div class="result-section"><h2>${title}</h2><dl>${itemsHtml.join('')}</dl></div>`;
+            }
+
+            function createItem(label, value, recommendation) {
+                if (!value) {
+                    return `<div class="result-item"><dt>${label}</dt><dd><em>Not found</em></dd><div class="recommendation bad">${recommendation || 'This tag is missing.'}</div></div>`;
+                }
+                const recHtml = recommendation ? `<div class="recommendation ${getRecClass(recommendation)}">${recommendation}</div>` : '';
+                return `<div class="result-item"><dt>${label}</dt><dd>${value}</dd>${recHtml}</div>`;
+            }
+            
+            function createHeadingsSection(headings) {
+                let h1Items = headings.h1.map(h => `<li>${h}</li>`).join('');
+                let h2Items = headings.h2.map(h => `<li>${h}</li>`).join('');
+                let h1Rec = '';
+                if (headings.h1.length === 0) h1Rec = `<div class="recommendation bad">Missing H1 tag. Every page should have exactly one H1.</div>`;
+                if (headings.h1.length > 1) h1Rec = `<div class="recommendation warning">Found ${headings.h1.length} H1 tags. It's best practice to use only one.</div>`;
+                
+                return `<div class="result-section"><h2>Headings</h2>
+                    <dl>
+                        <div class="result-item"><dt>H1 Tags (${headings.h1.length})</dt><dd><ul>${h1Items || '<em>None</em>'}</ul></dd>${h1Rec}</div>
+                        <div class="result-item"><dt>H2 Tags (${headings.h2.length})</dt><dd><ul>${h2Items || '<em>None</em>'}</ul></dd></div>
+                    </dl>
+                </div>`;
+            }
+            
+            function createImagesSection(images) {
+                let missingAltCount = 0;
+                let itemsHtml = images.map(img => {
+                    let altRec = '';
+                    if (!img.alt) {
+                        missingAltCount++;
+                        altRec = `<div class="recommendation warning">Missing alt text.</div>`;
+                    }
+                    return `<div class="result-item"><dt>Image</dt><dd>${img.src}${altRec}</dd></div>`;
+                }).join('');
+                
+                let summaryRec = missingAltCount > 0
+                    ? `<div class="recommendation bad">${missingAltCount} out of ${images.length} images are missing alt text.</div>`
+                    : `<div class="recommendation good">All ${images.length} images have alt text.</div>`;
+
+                return `<div class="result-section"><h2>Images (${images.length})</h2>${summaryRec}<dl>${itemsHtml}</dl></div>`;
+            }
+
+            // --- HELPER FUNCTIONS FOR RECOMMENDATIONS ---
+            function checkLength(value, min, max) {
+                if (!value) return 'Missing.';
+                const len = value.length;
+                if (len < min) return `Too short (${len} chars). Recommended: ${min}-${max} chars.`;
+                if (len > max) return `Too long (${len} chars). Recommended: ${min}-${max} chars.`;
+                return `Good length (${len} chars).`;
+            }
+            
+            function checkRequired(value) {
+                return value ? 'Present.' : 'Missing.';
+            }
+
+            function getRecClass(recText) {
+                if (recText.startsWith('Good')) return 'good';
+                if (recText.startsWith('Too') || recText.startsWith('Missing') || recText.startsWith('Found')) return 'warning';
+                return '';
+            }
+        });
+    </script>
+</body>
+</html>
