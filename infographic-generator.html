@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Infographic Generator - ToolHive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ─────────────────── GLOBAL STYLES & VARIABLES ─────────────────── */
+        :root {
+            --primary-color: #2563EB;
+            --secondary-accent: #FBBF24;
+            --background-color: #F3F4F6;
+            --heading-color: #1F2937;
+            --body-text-color: #4B5563;
+            --cta-color: #10B981;
+            --white-color: #FFFFFF;
+            --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--body-text-color); line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; width: 100%; }
+
+        /* ────────────────────────── HEADER ────────────────────────── */
+        .site-header { background-color: var(--white-color); padding: 1rem 0; box-shadow: var(--soft-shadow); width: 100%; position: sticky; top: 0; z-index: 1000; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .main-nav a { color: var(--body-text-color); font-weight: 600; text-decoration: none; transition: color 0.3s ease; }
+        .main-nav a:hover { color: var(--primary-color); }
+
+        /* ─────────────────── GENERATOR STYLES ─────────────────── */
+        main { padding: 2rem 0; }
+        .generator-layout { display: grid; grid-template-columns: 400px 1fr; gap: 2rem; align-items: flex-start; }
+
+        .input-panel, .preview-panel { background-color: var(--white-color); padding: 2rem; border-radius: 16px; box-shadow: var(--soft-shadow); }
+        .input-panel { position: sticky; top: 100px; }
+        .input-panel h2 { font-size: 1.5rem; margin-bottom: 1.5rem; }
+        
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--heading-color); }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.8rem 1rem; font-size: 1rem; font-family: 'Poppins', sans-serif; border-radius: 8px; border: 2px solid #E5E7EB; transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+        .form-group textarea { resize: vertical; min-height: 150px; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); }
+        
+        .generate-btn { background-color: var(--primary-color); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; width: 100%; }
+        .download-btn { background-color: var(--cta-color); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 1rem; display: none; }
+        
+        .preview-panel { text-align: center; }
+        #infographic-canvas { max-width: 100%; height: auto; border: 1px solid #E5E7EB; border-radius: 8px; }
+
+        @media (max-width: 992px) {
+            .generator-layout { grid-template-columns: 1fr; }
+            .input-panel { position: static; margin-bottom: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">ToolHive</a>
+            <nav class="main-nav"><a href="index.html#tools">← Back to All Tools</a></nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="generator-layout">
+                <div class="input-panel">
+                    <h2>Infographic Content</h2>
+                    <form id="infographic-form">
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <input type="text" id="title" placeholder="e.g., 5 Steps to Success" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="points">Key Points (one per line)</label>
+                            <textarea id="points" placeholder="- Start with a clear goal&#10;- Create a solid plan&#10;- Take consistent action" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="theme">Visual Theme</label>
+                            <select id="theme">
+                                <option value="corporate">Corporate Blue</option>
+                                <option value="creative">Creative Amber</option>
+                                <option value="minimalist">Minimalist Dark</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="generate-btn">Generate Infographic</button>
+                    </form>
+                </div>
+                <div class="preview-panel">
+                    <h2>Preview</h2>
+                    <canvas id="infographic-canvas" width="800" height="1000"></canvas>
+                    <a id="download-link" class="download-btn" href="#">Download Image</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('infographic-form');
+            const canvas = document.getElementById('infographic-canvas');
+            const ctx = canvas.getContext('2d');
+            const downloadLink = document.getElementById('download-link');
+
+            const themes = {
+                corporate: {
+                    bg: '#FFFFFF',
+                    headerBg: '#2563EB',
+                    headerColor: '#FFFFFF',
+                    titleColor: '#1F2937',
+                    textColor: '#4B5563',
+                    accentColor: '#2563EB',
+                    font: 'Poppins'
+                },
+                creative: {
+                    bg: '#FFFBEB',
+                    headerBg: '#FBBF24',
+                    headerColor: '#1F2937',
+                    titleColor: '#1F2937',
+                    textColor: '#4B5563',
+                    accentColor: '#F59E0B',
+                    font: 'Poppins'
+                },
+                minimalist: {
+                    bg: '#1F2937',
+                    headerBg: '#1F2937',
+                    headerColor: '#FFFFFF',
+                    titleColor: '#FFFFFF',
+                    textColor: '#D1D5DB',
+                    accentColor: '#FFFFFF',
+                    font: 'Poppins'
+                }
+            };
+
+            function drawInfographic() {
+                const title = document.getElementById('title').value || 'Your Title Here';
+                const pointsText = document.getElementById('points').value || 'Your first point.\nYour second point.';
+                const points = pointsText.split('\n').filter(p => p.trim() !== '');
+                const themeKey = document.getElementById('theme').value;
+                const theme = themes[themeKey];
+
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+
+                // 1. Clear and fill background
+                ctx.fillStyle = theme.bg;
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+                // 2. Draw Header
+                ctx.fillStyle = theme.headerBg;
+                ctx.fillRect(0, 0, canvasWidth, 150);
+                
+                // 3. Draw Title in Header
+                ctx.fillStyle = theme.headerColor;
+                ctx.font = `bold 48px ${theme.font}`;
+                ctx.textAlign = 'center';
+                ctx.fillText(title, canvasWidth / 2, 95);
+
+                // 4. Draw Points
+                let yPos = 220;
+                points.forEach((point, index) => {
+                    if (yPos > canvasHeight - 100) return; // Prevent drawing off-canvas
+
+                    const number = (index + 1).toString();
+                    point = point.replace(/^-/, '').trim(); // Clean up list markers
+
+                    // Draw Number Circle
+                    ctx.fillStyle = theme.accentColor;
+                    ctx.beginPath();
+                    ctx.arc(100, yPos, 30, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    // Draw Number Text
+                    ctx.fillStyle = theme.bg === '#FFFFFF' ? theme.headerColor : theme.bg;
+                    ctx.font = `bold 30px ${theme.font}`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(number, 100, yPos + 10);
+
+                    // Draw Point Text
+                    ctx.fillStyle = theme.textColor;
+                    ctx.font = `24px ${theme.font}`;
+                    ctx.textAlign = 'left';
+                    wrapText(ctx, point, 160, yPos, canvasWidth - 200, 30);
+                    
+                    yPos += 120; // Spacing for next point
+                });
+
+                // 5. Draw Footer/Branding
+                ctx.fillStyle = theme.textColor;
+                ctx.font = `16px ${theme.font}`;
+                ctx.textAlign = 'center';
+                ctx.fillText('Generated with ToolHive', canvasWidth / 2, canvasHeight - 30);
+                
+                // Make download link visible
+                downloadLink.style.display = 'block';
+            }
+
+            // Utility function to wrap long text
+            function wrapText(context, text, x, y, maxWidth, lineHeight) {
+                const words = text.split(' ');
+                let line = '';
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = line + words[n] + ' ';
+                    const metrics = context.measureText(testLine);
+                    const testWidth = metrics.width;
+                    if (testWidth > maxWidth && n > 0) {
+                        context.fillText(line, x, y);
+                        line = words[n] + ' ';
+                        y += lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+                context.fillText(line, x, y);
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                drawInfographic();
+            });
+            
+            document.getElementById('theme').addEventListener('change', drawInfographic);
+
+            downloadLink.addEventListener('click', (e) => {
+                const title = document.getElementById('title').value || 'infographic';
+                const filename = title.toLowerCase().replace(/\s+/g, '-') + '.png';
+                downloadLink.download = filename;
+                downloadLink.href = canvas.toDataURL('image/png');
+            });
+
+            // Initial Draw
+            drawInfographic();
+        });
+    </script>
+</body>
+</html>
