@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Encryptor & Decryptor - ToolHive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CryptoJS Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563EB;
+            --secondary-accent: #FBBF24;
+            --background-color: #F3F4F6;
+            --heading-color: #1F2937;
+            --body-text-color: #4B5563;
+            --cta-color: #10B981;
+            --white-color: #FFFFFF;
+            --soft-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --error-color: #EF4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--body-text-color); line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; width: 100%; }
+
+        .site-header { background-color: var(--white-color); padding: 1rem 0; box-shadow: var(--soft-shadow); width: 100%; position: sticky; top: 0; z-index: 1000; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .main-nav a { color: var(--body-text-color); font-weight: 600; text-decoration: none; }
+
+        main { padding: 3rem 0; }
+        .tool-wrapper { background-color: var(--white-color); padding: 2.5rem; border-radius: 16px; box-shadow: var(--soft-shadow); }
+        .tool-title { text-align: center; margin-bottom: 2rem; }
+        .tool-title h1 { font-size: 2.2rem; }
+        .tool-title p { font-size: 1.1rem; margin-top: 0.5rem; }
+
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--heading-color); }
+        .form-group textarea, .form-group input, .form-group select { width: 100%; padding: 0.8rem 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid #E5E7EB; font-family: 'Poppins', sans-serif; }
+        .form-group textarea { min-height: 150px; resize: vertical; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); }
+        
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: flex-end; margin-bottom: 1.5rem; }
+        .action-buttons { display: flex; gap: 1rem; }
+        .action-btn { flex: 1; background-color: var(--primary-color); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background-color 0.2s ease; }
+        .action-btn#decrypt-btn { background-color: var(--secondary-accent); color: var(--heading-color); }
+        .action-btn:hover { opacity: 0.9; }
+        
+        .utility-bar { display: flex; gap: 1rem; margin-top: 1rem; }
+        .utility-btn { flex-grow: 1; border: 2px solid var(--cta-color); background-color: transparent; color: var(--cta-color); padding: 0.8rem 1rem; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s ease; }
+        .utility-btn:hover { background-color: var(--cta-color); color: white; }
+        .utility-btn#clear-btn { border-color: var(--error-color); color: var(--error-color); }
+        .utility-btn#clear-btn:hover { background-color: var(--error-color); color: white; }
+
+        @media (max-width: 600px) {
+            .controls { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-content">
+            <a href="index.html" class="logo">ToolHive</a>
+            <nav class="main-nav"><a href="index.html#tools">← Back to All Tools</a></nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="tool-wrapper">
+                <div class="tool-title">
+                    <h1>🔐 Text Encryptor & Decryptor</h1>
+                    <p>Secure your text with a password using standard encryption algorithms.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="text-input">Input Text</label>
+                    <textarea id="text-input" placeholder="Type or paste your text here..."></textarea>
+                </div>
+                
+                <div class="controls">
+                    <div class="form-group">
+                        <label for="secret-key">Secret Key (Password)</label>
+                        <input type="password" id="secret-key" placeholder="Enter a strong password">
+                    </div>
+                    <div class="form-group">
+                        <label for="algorithm">Algorithm</label>
+                        <select id="algorithm">
+                            <option value="AES">AES (Advanced Encryption Standard)</option>
+                            <option value="TripleDES">TripleDES</option>
+                            <option value="Rabbit">Rabbit</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="encrypt-btn" class="action-btn">Encrypt</button>
+                    <button id="decrypt-btn" class="action-btn">Decrypt</button>
+                </div>
+
+                <div class="form-group" style="margin-top: 2rem;">
+                    <label for="output-text">Output</label>
+                    <textarea id="output-text" readonly placeholder="Result will appear here..."></textarea>
+                </div>
+
+                <div class="utility-bar">
+                    <button class="utility-btn" id="copy-btn">Copy Output</button>
+                    <button class="utility-btn" id="clear-btn">Clear All</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const textInput = document.getElementById('text-input');
+            const secretKeyInput = document.getElementById('secret-key');
+            const algorithmSelect = document.getElementById('algorithm');
+            const outputText = document.getElementById('output-text');
+            
+            const encryptBtn = document.getElementById('encrypt-btn');
+            const decryptBtn = document.getElementById('decrypt-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const clearBtn = document.getElementById('clear-btn');
+
+            encryptBtn.addEventListener('click', () => {
+                const plainText = textInput.value;
+                const secretKey = secretKeyInput.value;
+                const algorithm = algorithmSelect.value;
+
+                if (!plainText || !secretKey) {
+                    alert('Please enter text and a secret key.');
+                    return;
+                }
+
+                try {
+                    let encrypted;
+                    if (algorithm === 'AES') {
+                        encrypted = CryptoJS.AES.encrypt(plainText, secretKey);
+                    } else if (algorithm === 'TripleDES') {
+                        encrypted = CryptoJS.TripleDES.encrypt(plainText, secretKey);
+                    } else if (algorithm === 'Rabbit') {
+                        encrypted = CryptoJS.Rabbit.encrypt(plainText, secretKey);
+                    }
+                    outputText.value = encrypted.toString();
+                } catch (error) {
+                    console.error('Encryption Error:', error);
+                    outputText.value = 'Encryption failed. Please try again.';
+                }
+            });
+
+            decryptBtn.addEventListener('click', () => {
+                const cipherText = textInput.value;
+                const secretKey = secretKeyInput.value;
+                const algorithm = algorithmSelect.value;
+
+                if (!cipherText || !secretKey) {
+                    alert('Please enter the encrypted text and the secret key.');
+                    return;
+                }
+
+                try {
+                    let decrypted;
+                    if (algorithm === 'AES') {
+                        decrypted = CryptoJS.AES.decrypt(cipherText, secretKey);
+                    } else if (algorithm === 'TripleDES') {
+                        decrypted = CryptoJS.TripleDES.decrypt(cipherText, secretKey);
+                    } else if (algorithm === 'Rabbit') {
+                        decrypted = CryptoJS.Rabbit.decrypt(cipherText, secretKey);
+                    }
+                    
+                    const plainText = decrypted.toString(CryptoJS.enc.Utf8);
+                    
+                    if (plainText) {
+                        outputText.value = plainText;
+                    } else {
+                        throw new Error('Decryption resulted in empty text. Wrong key or algorithm?');
+                    }
+
+                } catch (error) {
+                    console.error('Decryption Error:', error);
+                    outputText.value = 'Decryption failed. Please check your secret key and algorithm.';
+                }
+            });
+
+            copyBtn.addEventListener('click', () => {
+                if (!outputText.value) return;
+                outputText.select();
+                document.execCommand('copy');
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy Output';
+                }, 2000);
+            });
+
+            clearBtn.addEventListener('click', () => {
+                textInput.value = '';
+                secretKeyInput.value = '';
+                outputText.value = '';
+            });
+        });
+    </script>
+</body>
+</html>
